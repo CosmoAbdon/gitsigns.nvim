@@ -24,6 +24,7 @@ Watcher.__index = Watcher
 --- @param gitdir string
 --- @return Gitsigns.Repo.Watcher
 function Watcher.new(gitdir)
+  local __FUNC__ = 'Watcher.new'
   local handle = assert(vim.uv.new_fs_event())
 
   --- @type Gitsigns.Repo.Watcher
@@ -44,6 +45,7 @@ function Watcher.new(gitdir)
     handle:close()
   end)
 
+  log.dprintf('Starting git dir watcher on %s', gitdir)
   self.handle:start(gitdir, {}, Watcher.handler1(util.weak_ref(self)))
 
   return self
@@ -97,7 +99,8 @@ function Watcher.handler1(weak_self)
 
     local watcher = weak_self.ref
     if not watcher then
-      return -- garbage collected
+      log.dprint('watcher was garbage collected')
+      return
     end
 
     if err then
